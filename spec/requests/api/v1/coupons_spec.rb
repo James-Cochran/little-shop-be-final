@@ -20,7 +20,42 @@ RSpec.describe "Coupons" do
       expect(coupon_response).to have_key(:data)
       coupon = coupon_response[:data]
 
-      binding.pry
+      expect(coupon).to have_key(:type)
+      expect(coupon[:type]).to eq('coupon')
+
+      expect(coupon).to have_key(:id)
+      expect(coupon[:id]).to be_an(String)
+
+      expect(coupon).to have_key(:attributes)
+      attributes = coupon[:attributes]
+
+      expect(attributes).to have_key(:name)
+      expect(attributes[:name]).to eq("$10 dollars off")
+
+      expect(attributes).to have_key(:code)
+      expect(attributes[:code]).to eq("10off")
+
+      expect(attributes).to have_key(:value)
+      expect(attributes[:value]).to eq(10)
+
+      expect(attributes).to have_key(:status)
+      expect(attributes[:status]).to eq(true)
+
+      expect(attributes).to have_key(:use_count)
+      expect(attributes[:use_count]).to eq(2)
+    end
+
+    it "returns a record not found if there is no coupon" do
+      invalid_coupon_id = @coupon1.id + 1
+
+      get merchant_coupon_path(@merchant.id, invalid_coupon_id)
+
+      expect(response).to have_http_status(:not_found)
+
+      data = JSON.parse(response.body, symbolize_names: true)
+
+      expect(data[:errors][0][:status]).to eq("404")
+      expect(data[:errors][0][:message]).to eq("Record not found.")
     end
   end
 end
